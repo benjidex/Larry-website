@@ -695,3 +695,70 @@ textarea {
     width: 100%;
   }
 }
+
+@media (max-width: 420px) {
+  :root {
+    scroll-padding-top: 110px;
+  }
+
+  .site-header {
+    border-radius: 120px;
+  }
+
+  .header-inner {
+    padding: 14px 0;
+    gap: 0.7rem;
+  }
+
+  .brand {
+    font-size: 1.05rem;
+    letter-spacing: 0.18em;
+  }
+
+  .hero {
+    padding: 80px 0 40px;
+    background-position: center 30%;
+    min-height: 68vh;
+  }
+
+  .hero-copy {
+    margin-top: 1.8rem;
+    line-height: 1.7;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .gallery-figure img {
+    height: 260px;
+  }
+
+  .gallery-figure figcaption {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+
+  .booking-info h3 {
+    font-size: 1.6rem;
+  }
+
+  .booking-grid {
+    gap: 18px;
+  }
+
+  .lightbox-close,
+  .lightbox-prev,
+  .lightbox-next {
+    padding: 10px 12px;
+  }
+}
+
+:target {
+  scroll-margin-top: 110px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
