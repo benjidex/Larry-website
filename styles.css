@@ -70,6 +70,7 @@ textarea {
 }
 
 .site-nav {
+
   display: flex;
   gap: 1.4rem;
   flex-wrap: wrap;
