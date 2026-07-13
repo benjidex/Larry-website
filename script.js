@@ -1,24 +1,55 @@
 const form = document.getElementById('booking-form');
 const messageBox = document.getElementById('form-message');
 
-form.addEventListener('submit', (event) => {
+async function submitBooking(payload) {
+  const baseUrl = 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/bookings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data?.ok) {
+    const details = data?.details?.join ? data.details.join(', ') : (data?.error || 'Request failed');
+    throw new Error(details);
+  }
+  return data;
+}
+
+form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   const name = form.elements.name.value.trim();
   const email = form.elements.email.value.trim();
+  const phone = form.elements.phone.value.trim();
   const date = form.elements.date.value;
   const service = form.elements.service.value;
+  const message = form.elements.message?.value?.trim?.() || '';
 
-  if (!name || !email || !date || !service) {
+  messageBox.classList.remove('visible');
+
+  if (!name || !email || !phone || !date || !service || !message) {
     messageBox.textContent = 'Please fill in all fields before sending your request.';
     messageBox.classList.add('visible');
     return;
   }
 
-  messageBox.textContent = `Thanks, ${name}! Your reservation request for ${service} on ${date} has been sent. We will contact you soon at ${email}.`;
-  messageBox.classList.add('visible');
-  form.reset();
+  try {
+    messageBox.textContent = 'Sending your request...';
+    messageBox.classList.add('visible');
+
+    await submitBooking({ name, email, phone, date, service, message });
+
+    messageBox.textContent = `Thanks, ${name}! Your reservation request for ${service} on ${date} has been sent. We will contact you soon at ${email}.`;
+    messageBox.classList.add('visible');
+    form.reset();
+  } catch (err) {
+    messageBox.textContent = `Could not send request: ${err.message || 'Unknown error'}`;
+    messageBox.classList.add('visible');
+  }
 });
+
 
 const figures = Array.from(document.querySelectorAll('.gallery-figure'));
 const filterButtons = Array.from(document.querySelectorAll('.filter-button'));
