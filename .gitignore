@@ -6,3 +6,10 @@
 /Screenshot 2026-07-08 210446.png
 /Screenshot 2026-07-08 220610.png
 /Wedding
+
+# env files
+.env
+.env.local
+.env.*.local
+.env.*
+
