@@ -1,21 +1,27 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
+// ── Supabase client ──────────────────────────────────────────────────
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SECRET_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing SUPABASE_URL or SUPABASE_SECRET_KEY in .env');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// ── Middleware ────────────────────────────────────────────────────────
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '200kb' }));
 
-const dataDir = path.join(__dirname, 'data');
-const bookingsFile = path.join(dataDir, 'bookings.json');
-
-function ensureStorage() {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(bookingsFile)) fs.writeFileSync(bookingsFile, JSON.stringify([]), 'utf8');
-}
+// ── Helpers ──────────────────────────────────────────────────────────
 
 function isValidEmail(email) {
   return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -29,26 +35,25 @@ function normalizePayload(payload) {
   const service = String(payload?.service ?? '').trim();
   const message = String(payload?.message ?? '').trim();
 
-  // Date is required from the <input type="date"> which returns yyyy-mm-dd
   const dateOk = /^\d{4}-\d{2}-\d{2}$/.test(date);
 
   return { name, email, phone, date, service, message, dateOk };
 }
 
-app.post('/api/bookings', (req, res) => {
+const allowedServices = new Set([
+  'Portrait',
+  'Engagement',
+  'Wedding',
+  'Birthday',
+  'Maternity',
+  'Graduation'
+]);
+
+// ── Routes ───────────────────────────────────────────────────────────
+
+app.post('/api/bookings', async (req, res) => {
   try {
-    ensureStorage();
-
     const { name, email, phone, date, service, message, dateOk } = normalizePayload(req.body);
-
-    const allowedServices = new Set([
-      'Portrait',
-      'Engagement',
-      'Wedding',
-      'Birthday',
-      'Maternity',
-      'Graduation'
-    ]);
 
     const errors = [];
     if (!name) errors.push('name is required');
@@ -62,13 +67,9 @@ app.post('/api/bookings', (req, res) => {
       return res.status(400).json({ ok: false, error: 'Validation failed', details: errors });
     }
 
-    const raw = fs.readFileSync(bookingsFile, 'utf8');
-    const bookings = raw ? JSON.parse(raw) : [];
-
-    const now = new Date();
     const record = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      createdAt: now.toISOString(),
+      created_at: new Date().toISOString(),
       name,
       email,
       phone,
@@ -77,10 +78,37 @@ app.post('/api/bookings', (req, res) => {
       message
     };
 
-    bookings.push(record);
-    fs.writeFileSync(bookingsFile, JSON.stringify(bookings, null, 2), 'utf8');
+    const { data, error } = await supabase
+      .from('bookings')
+      .insert(record)
+      .select()
+      .single();
 
-    return res.status(201).json({ ok: true, booking: record });
+    if (error) {
+      console.error('Supabase insert error:', error);
+      return res.status(500).json({ ok: false, error: 'Database error', details: [error.message] });
+    }
+
+    return res.status(201).json({ ok: true, booking: data });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: 'Internal server error' });
+  }
+});
+
+app.get('/api/bookings', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Supabase select error:', error);
+      return res.status(500).json({ ok: false, error: 'Database error', details: [error.message] });
+    }
+
+    return res.json({ ok: true, bookings: data });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, error: 'Internal server error' });
@@ -91,7 +119,9 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Start ────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`Booking backend listening on http://localhost:${PORT}`);
+  console.log(`Supabase: ${supabaseUrl ? 'configured' : 'missing'}`);
 });
 
