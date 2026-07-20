@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -16,6 +17,19 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// ── Email transporter (Gmail SMTP) ──────────────────────────────────
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: Number(process.env.EMAIL_PORT) || 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+const STUDIO_EMAIL = process.env.EMAIL_USER || 'larrylarstudios@gmail.com';
 
 // ── Middleware ────────────────────────────────────────────────────────
 app.use(cors({ origin: '*' }));
@@ -48,6 +62,61 @@ const allowedServices = new Set([
   'Maternity',
   'Graduation'
 ]);
+
+async function sendBookingNotification(booking) {
+  try {
+    const mailOptions = {
+      from: `"Larry Lar Studio" <${STUDIO_EMAIL}>`,
+      to: STUDIO_EMAIL,
+      subject: `📸 New Booking: ${booking.service} — ${booking.name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1a1a1a;">New Booking Request</h2>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+            <tr>
+              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold; width: 120px;">Name</td>
+              <td style="padding: 8px 12px;">${booking.name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Email</td>
+              <td style="padding: 8px 12px;">
+                <a href="mailto:${booking.email}">${booking.email}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Phone</td>
+              <td style="padding: 8px 12px;">${booking.phone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Service</td>
+              <td style="padding: 8px 12px;">${booking.service}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Requested Date</td>
+              <td style="padding: 8px 12px;">${booking.date}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Message</td>
+              <td style="padding: 8px 12px;">${booking.message}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Booked At</td>
+              <td style="padding: 8px 12px;">${new Date(booking.created_at).toLocaleString()}</td>
+            </tr>
+          </table>
+          <p style="margin-top: 20px; color: #666;">
+            Reply to <a href="mailto:${booking.email}">${booking.email}</a> to follow up with this client.
+          </p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 Email notification sent for booking ${booking.id}`);
+  } catch (err) {
+    console.error('Failed to send email notification:', err.message);
+  }
+}
 
 // ── Routes ───────────────────────────────────────────────────────────
 
@@ -89,6 +158,9 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(500).json({ ok: false, error: 'Database error', details: [error.message] });
     }
 
+    // Send email notification asynchronously (don't block response)
+    sendBookingNotification(data);
+
     return res.status(201).json({ ok: true, booking: data });
   } catch (err) {
     console.error(err);
@@ -123,5 +195,6 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Booking backend listening on http://localhost:${PORT}`);
   console.log(`Supabase: ${supabaseUrl ? 'configured' : 'missing'}`);
+  console.log(`Email: ${process.env.EMAIL_USER ? 'configured' : 'missing'}`);
 });
 
