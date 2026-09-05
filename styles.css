@@ -1,5 +1,4 @@
 :root {
-  --header-height: 72px;
   color-scheme: dark;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #111;
@@ -15,7 +14,6 @@ body {
   min-height: 100vh;
   background: radial-gradient(circle at top, #222 0%, #050505 55%);
   color: #f7f7f7;
-  padding-top: var(--header-height);
 }
 
 img {
@@ -52,7 +50,6 @@ textarea {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   z-index: 100;
-  height: var(--header-height);
 }
 
 
@@ -61,7 +58,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 12px 0;
+  padding: 18px 0;
 }
 
 .brand {
@@ -206,64 +203,7 @@ textarea {
   text-align: left;
   max-width: 420px;
   margin-left: clamp(1.5rem, 5vw, 4rem);
-  @media (max-width: 420px) {
-    :root {
-      scroll-padding-top: 110px;
-    }
-
-    .site-header {
-      border-radius: 120px;
-    }
-
-    .header-inner {
-      padding: 6px 0;
-      gap: 0.7rem;
-    }
-
-    .brand {
-      font-size: 1.05rem;
-      letter-spacing: 0.18em;
-    }
-
-    .hero {
-      padding: 80px 0 40px;
-      background-position: center 30%;
-      min-height: 68vh;
-    }
-
-    .hero-copy {
-      margin-top: 1.8rem;
-      line-height: 1.7;
-    }
-
-    .gallery-grid {
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .gallery-figure img {
-      height: 260px;
-    }
-
-    .gallery-figure figcaption {
-      font-size: 0.9rem;
-      padding: 10px 12px;
-    }
-
-    .booking-info h3 {
-      font-size: 1.6rem;
-    }
-
-    .booking-grid {
-      gap: 17px;
-    }
-
-    .lightbox-close,
-    .lightbox-prev,
-    .lightbox-next {
-      padding: 10px 12px;
-    }
-  }
+}
 .about {
   display: grid;
   gap: 32px;
@@ -715,8 +655,7 @@ textarea {
 
 @media (max-width: 420px) {
   :root {
-    --header-height: 56px;
-    scroll-padding-top: 56px;
+    scroll-padding-top: 110px;
   }
 
   .site-header {
@@ -729,20 +668,19 @@ textarea {
   }
 
   .brand {
-    font-size: 0.95rem;
-    letter-spacing: 0.14em;
+    font-size: 1.05rem;
+    letter-spacing: 0.18em;
   }
 
   .hero {
-    padding: 72px 0 36px;
+    padding: 80px 0 40px;
     background-position: center 30%;
     min-height: 68vh;
   }
 
   .hero-copy {
-    margin-top: 1.2rem;
-    line-height: 1.55;
-    font-size: 0.95rem;
+    margin-top: 1.8rem;
+    line-height: 1.7;
   }
 
   .gallery-grid {
@@ -751,21 +689,12 @@ textarea {
   }
 
   .gallery-figure img {
-    height: 220px;
+    height: 260px;
   }
 
   .gallery-figure figcaption {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     padding: 10px 12px;
-  }
-
-  .site-nav a {
-    font-size: 0.85rem;
-    padding: 0.2rem 0;
-  }
-
-  .header-inner {
-    padding: 8px 0;
   }
 
   .booking-info h3 {
