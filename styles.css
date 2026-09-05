@@ -206,61 +206,64 @@ textarea {
   text-align: left;
   max-width: 420px;
   margin-left: clamp(1.5rem, 5vw, 4rem);
-  margin-top: 20px;
-}
+  @media (max-width: 420px) {
+    :root {
+      scroll-padding-top: 110px;
+    }
 
-.eyebrow {
-  margin: 0 0 1rem;
-  text-transform: uppercase;
-  font-size: 0.82rem;
-  letter-spacing: 0.24em;
-  color: #ddd;
-}
+    .site-header {
+      border-radius: 120px;
+    }
 
-.hero h1 {
-  margin: 0;
-  font-size: clamp(2.75rem, 5vw, 4.6rem);
-  line-height: 1.02;
-  letter-spacing: -0.04em;
-}
+    .header-inner {
+      padding: 6px 0;
+      gap: 0.7rem;
+    }
 
-.hero-copy {
-  margin: 3rem auto 0;
-  max-width: 620px;
-  color: #e7e7e7;
-  line-height: 1.85;
-}
+    .brand {
+      font-size: 1.05rem;
+      letter-spacing: 0.18em;
+    }
 
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2rem;
-  padding: 0.95rem 1.8rem;
-  background: rgba(255, 255, 255, 0.16);
-  color: #fafafa;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(16px);
-  box-shadow: inset 0 0 0.5rem rgba(255, 255, 255, 0.08), 0 18px 40px rgba(0, 0, 0, 0.2);
-  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-}
+    .hero {
+      padding: 80px 0 40px;
+      background-position: center 30%;
+      min-height: 68vh;
+    }
 
-.button:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.24);
-  border-color: rgba(255, 255, 255, 0.32);
-  box-shadow: inset 0 0 0.55rem rgba(255, 255, 255, 0.12), 0 22px 44px rgba(0, 0, 0, 0.22);
-}
+    .hero-copy {
+      margin-top: 1.8rem;
+      line-height: 1.7;
+    }
 
-.about,
-.portfolio,
-.booking {
-  padding: 80px 0;
-}
+    .gallery-grid {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 14px;
+    }
 
+    .gallery-figure img {
+      height: 260px;
+    }
+
+    .gallery-figure figcaption {
+      font-size: 0.9rem;
+      padding: 10px 12px;
+    }
+
+    .booking-info h3 {
+      font-size: 1.6rem;
+    }
+
+    .booking-grid {
+      gap: 17px;
+    }
+
+    .lightbox-close,
+    .lightbox-prev,
+    .lightbox-next {
+      padding: 10px 12px;
+    }
+  }
 .about {
   display: grid;
   gap: 32px;
