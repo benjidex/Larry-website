@@ -201,7 +201,7 @@ textarea {
   position: relative;
   z-index: 1;
   text-align: left;
-  max-width: 420px;
+  max-width: 450px;
   margin-left: clamp(1.5rem, 5vw, 4rem);
 }
 .about {
@@ -291,9 +291,6 @@ textarea {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-
-
-
 .gallery-item {
   border-radius: 24px;
   overflow: hidden;
@@ -329,9 +326,6 @@ textarea {
   object-fit: cover;
   display: block;
 }
-
-
-
 
 .gallery-figure figcaption {
   padding: 12px 14px;

@@ -10,7 +10,7 @@ import fs from 'fs/promises';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -318,7 +318,8 @@ app.get('/api/config', (req, res) => {
 // ── Start ────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`Booking backend listening on http://localhost:${PORT}`);
-  console.log(`Supabase: ${supabaseUrl ? 'configured' : 'missing'}`);
-  console.log(`Email: ${process.env.EMAIL_USER ? 'configured' : 'missing'}`);
+  console.log(`Supabase URL: ${supabaseUrl ? supabaseUrl : 'missing'}`);
+  console.log(`Supabase anon key available: ${publishableKey ? 'yes' : 'no'}`);
+  console.log(`Email configured: ${process.env.EMAIL_USER ? 'yes' : 'no'}`);
 });
 
