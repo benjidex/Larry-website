@@ -112,6 +112,30 @@ textarea {
   width: 100%;
 }
 
+/* Generic button style for anchor elements with class="button" */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.4rem;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  text-transform: none;
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 0 0.35rem rgba(255, 255, 255, 0.06), 0 12px 28px rgba(0,0,0,0.18);
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.32);
+  box-shadow: inset 0 0 0.45rem rgba(255,255,255,0.1), 0 16px 34px rgba(0,0,0,0.22);
+}
+
 .button.instagram-button {
   display: inline-flex;
   align-items: center;
@@ -209,9 +233,6 @@ textarea {
   gap: 32px;
 }
 
-
-
-
 .about h2,
 .section-header h2 {
   margin: 0;
@@ -258,7 +279,7 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.24em;
   color: #aaa;
-  font-size: 0.75rem;
+  font-size: 0.80rem;
 }
 
 .portfolio-filters {
