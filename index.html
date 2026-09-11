@@ -272,7 +272,7 @@
       // Backwards-compatible top-level globals expected by booking-reservation.js
       window.__SUPABASE_URL__ = window.__APP_CONFIG__.supabaseUrl;
       window.__SUPABASE_ANON_KEY__ = window.__APP_CONFIG__.supabaseAnonKey;
-      async function window.__APP_CONFIG_READY__ = loadAppConfig(); {
+      async function loadAppConfig() {
         try {
           const response = await fetch('/api/config');
           if (!response.ok) return;
