@@ -4,14 +4,20 @@
 
   if (!form || !messageBox) return;
 
-  const supabaseUrl = window.__SUPABASE_URL__ || window.__APP_CONFIG__?.supabaseUrl || '';
-  const supabaseAnonKey = window.__SUPABASE_ANON_KEY__ || window.__APP_CONFIG__?.supabaseAnonKey || '';
+  async function getSupabaseClient() {
+    // Wait for the async config fetch to finish before reading values off it
+    if (window.__APP_CONFIG_READY__) {
+      try { await window.__APP_CONFIG_READY__; } catch (e) { /* ignore, fall through to defaults */ }
+    }
 
-  const canUseSupabase = !!(supabaseUrl && supabaseAnonKey && window.supabase && window.supabase.createClient);
-  const supabase = canUseSupabase ? window.supabase.createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } }) : null;
+    const supabaseUrl = window.__APP_CONFIG__?.supabaseUrl || window.__SUPABASE_URL__ || '';
+    const supabaseAnonKey = window.__APP_CONFIG__?.supabaseAnonKey || window.__SUPABASE_ANON_KEY__ || '';
 
-  const originIsFile = location.protocol === 'file:' || !location.hostname;
-  const apiBase = originIsFile ? (`http://localhost:${window.__APP_CONFIG__?.port || '3001'}`) : '';
+    const canUseSupabase = !!(supabaseUrl && supabaseAnonKey && window.supabase && window.supabase.createClient);
+    return canUseSupabase
+      ? window.supabase.createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } })
+      : null;
+  }
 
   async function showMessage(text, isError = false) {
     messageBox.textContent = text;
@@ -33,6 +39,12 @@
 
     if (!payload.name || !payload.email || !payload.phone || !payload.date || !payload.service || !payload.message) {
       await showMessage('Please fill in all fields before reserving a slot.', true);
+      return;
+    }
+
+    const supabase = await getSupabaseClient();
+    if (!supabase) {
+      await showMessage('Booking is temporarily unavailable. Please try again later.', true);
       return;
     }
 
@@ -59,6 +71,3 @@
     }
   });
 })();
-
-
- 
