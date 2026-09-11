@@ -278,10 +278,10 @@
           if (!response.ok) return;
           const config = await response.json();
           window.__APP_CONFIG__ = {
-            supabaseUrl: config.supabaseUrl || '',
-            supabaseAnonKey: config.supabaseAnonKey || '',
-            storageBucket: config.storageBucket || 'portfolio-images'
-          };
+          supabaseUrl: 'https://aspgcdnryjyzxgifvldz.supabase.co',
+          supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzcGdjZG5yeWp5enhnaWZ2bGR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NTkwNTIsImV4cCI6MjA5MjQzNTA1Mn0.SbggeC3xRQ0be6dow4l41WdMu06jSuW82OoTP4XBPJk',
+          storageBucket: 'portfolio-images'
+  };
           // mirror to legacy globals for other scripts
           window.__SUPABASE_URL__ = window.__APP_CONFIG__.supabaseUrl;
           window.__SUPABASE_ANON_KEY__ = window.__APP_CONFIG__.supabaseAnonKey;
