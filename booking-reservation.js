@@ -39,16 +39,17 @@
     try {
       await showMessage('Reserving your session slot...');
 
-      const response = await fetch(apiBase + '/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const { error } = await supabase.from('bookings').insert([{
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        date: payload.date,
+        service: payload.service,
+        message: payload.message
+      }]);
 
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.ok) {
-        const errMsg = result?.error || (result?.details ? result.details.join('; ') : 'Unable to reserve your slot.');
-        throw new Error(errMsg || 'Could not reserve slot.');
+      if (error) {
+        throw new Error(error.message || 'Could not reserve slot.');
       }
 
       await showMessage(`Reserved! Your session for ${payload.date} is now confirmed.`, false);
@@ -60,3 +61,4 @@
 })();
 
 
+ 
