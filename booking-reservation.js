@@ -10,6 +10,9 @@
   const canUseSupabase = !!(supabaseUrl && supabaseAnonKey && window.supabase && window.supabase.createClient);
   const supabase = canUseSupabase ? window.supabase.createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } }) : null;
 
+  const originIsFile = location.protocol === 'file:' || !location.hostname;
+  const apiBase = originIsFile ? (`http://localhost:${window.__APP_CONFIG__?.port || '3001'}`) : '';
+
   async function showMessage(text, isError = false) {
     messageBox.textContent = text;
     messageBox.classList.add('visible');
@@ -36,14 +39,16 @@
     try {
       await showMessage('Reserving your session slot...');
 
-      if (!canUseSupabase) {
-        throw new Error('Booking service is not configured. Please contact us directly.');
-      }
+      const response = await fetch(apiBase + '/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-      const { error } = await supabase.from('bookings').insert([payload]);
-
-      if (error) {
-        throw new Error(error.message || 'Could not reserve slot.');
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) {
+        const errMsg = result?.error || (result?.details ? result.details.join('; ') : 'Unable to reserve your slot.');
+        throw new Error(errMsg || 'Could not reserve slot.');
       }
 
       await showMessage(`Reserved! Your session for ${payload.date} is now confirmed.`, false);
@@ -53,3 +58,5 @@
     }
   });
 })();
+
+
