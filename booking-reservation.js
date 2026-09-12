@@ -51,20 +51,26 @@
     try {
       await showMessage('Reserving your session slot...');
 
-      const { error } = await supabase.from('bookings').insert([{
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone,
-        date: payload.date,
-        service: payload.service,
-        message: payload.message
-      }]);
+      // Use the database RPC instead of inserting directly. This keeps the
+      // browser independent of table column names and works with RLS enabled.
+      const { data, error } = await supabase.rpc('create_booking', {
+        p_name: payload.name,
+        p_email: payload.email,
+        p_phone: payload.phone,
+        p_date: payload.date,
+        p_service: payload.service,
+        p_message: payload.message
+      });
 
       if (error) {
         throw new Error(error.message || 'Could not reserve slot.');
       }
 
-      await showMessage(`Reserved! Your session for ${payload.date} is now confirmed.`, false);
+      if (!data?.success) {
+        throw new Error(data?.error || 'Could not reserve slot.');
+      }
+
+      await showMessage(`Booking request received for ${payload.date}. It is pending confirmation.`, false);
       form.reset();
     } catch (err) {
       await showMessage(err.message || 'Could not complete booking.', true);

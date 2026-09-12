@@ -75,12 +75,12 @@ const allowedServices = new Set([
 
 async function sendBookingNotification(booking) {
   try {
-    const bName = booking.customer_name || booking.name || booking.customer_name;
-    const bEmail = booking.customer_email || booking.email || booking.customer_email;
-    const bPhone = booking.customer_phone || booking.phone || booking.customer_phone;
-    const bService = booking.service || booking.service;
-    const bDate = booking.booking_date || booking.date || booking.booking_date;
-    const bMessage = booking.message || booking.message;
+    const bName = booking.customer_name;
+    const bEmail = booking.customer_email;
+    const bPhone = booking.customer_phone;
+    const bService = booking.service;
+    const bDate = booking.date;
+    const bMessage = booking.message;
 
     const mailOptions = {
       from: `"Larry Lar Studios" <${STUDIO_EMAIL}>`,
@@ -115,10 +115,6 @@ async function sendBookingNotification(booking) {
             <tr>
               <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Message</td>
               <td style="padding: 8px 12px;">${bMessage}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 12px; background: #f5f5f5; font-weight: bold;">Booked At</td>
-              <td style="padding: 8px 12px;">${new Date(booking.created_at).toLocaleString()}</td>
             </tr>
           </table>
           <p style="margin-top: 20px; color: #666;">
@@ -155,85 +151,36 @@ app.post('/api/bookings', async (req, res) => {
 
     const record = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      created_at: new Date().toISOString(),
-      name,
-      email,
-      phone,
-      booking_date: date,
+      customer_name: name,
+      customer_email: email,
+      customer_phone: phone,
+      date,
       service,
       message,
       status: 'pending'
     };
 
     if (supabase) {
-      // Try inserting with the production schema column names first
       try {
-        const prodRecord = {
-          customer_name: name,
-          customer_email: email,
-          customer_phone: phone,
-          booking_date: date,
-          // Provide a default booking_time to satisfy DB schemas that require it
-          booking_time: '00:00:00',
-          service,
-          message,
-          status: record.status
-        };
-
         const { data, error } = await supabase
-          .from('bookings')
-          .insert(prodRecord)
-          .select()
-          .single();
+          .rpc('create_booking', {
+            p_name: name,
+            p_email: email,
+            p_phone: phone,
+            p_date: date,
+            p_service: service,
+            p_message: message
+          });
 
         if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'Could not create booking.');
 
-        // Send email notification asynchronously (don't block response)
-        sendBookingNotification(data);
-        return res.status(201).json({ ok: true, booking: data });
+        const booking = { ...record, id: data.booking_id, status: data.status };
+        sendBookingNotification(booking);
+        return res.status(201).json({ ok: true, booking });
       } catch (prodErr) {
-        console.warn('Prod insert failed:', prodErr.message || prodErr);
-        // If Supabase reports a missing column in the cached schema (PGRST204),
-        // disable Supabase usage for this process so we consistently fall back
-        // to local JSON storage instead of repeatedly failing.
-        const msg = prodErr?.message || '';
-        const code = prodErr?.code || '';
-        if (code === 'PGRST204' || msg.includes("Could not find the 'date' column")) {
-          console.warn('Detected Supabase schema mismatch (date column). Disabling Supabase fallback to local storage.');
-          supabase = null;
-          // fall through to local JSON fallback
-          // skip trying legacy insert
-          // (we don't return here so the outer flow continues to local storage)
-        } else {
-          try {
-            // Legacy schema uses name/email/phone/date
-            const legacyRecord = {
-              name,
-              email,
-              phone,
-              date,
-              service,
-              message
-            };
-
-            const { data: legacyData, error: legacyError } = await supabase
-              .from('bookings')
-              .insert(legacyRecord)
-              .select()
-              .single();
-
-            if (legacyError) {
-              console.error('Supabase insert error (legacy):', legacyError);
-              throw legacyError;
-            }
-
-            sendBookingNotification(legacyData);
-            return res.status(201).json({ ok: true, booking: legacyData });
-          } catch (legacyErr) {
-            console.error('Supabase insert error (both attempts):', prodErr, legacyErr);
-            // Fall through to local JSON fallback below
-          }
-        }
+        console.error('Supabase booking RPC failed:', prodErr.message || prodErr);
+        return res.status(500).json({ ok: false, error: 'Could not create booking.', details: [prodErr.message || String(prodErr)] });
       }
     }
 
@@ -272,7 +219,7 @@ app.get('/api/bookings', async (req, res) => {
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('date', { ascending: false });
 
       if (error) {
         console.error('Supabase select error:', error);
