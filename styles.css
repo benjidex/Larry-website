@@ -489,7 +489,7 @@ textarea {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.04);
   color: #fff;
-  padding: 14px 16px;
+  padding: 10px 14px;
   outline: none;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
@@ -508,7 +508,7 @@ textarea {
 
 .footer-links a:not(:first-child) {
   margin-left: 10px;
-  padding-left: 16px;
+  padding-left: 14px;
   border-left: 1px solid rgba(255,255,255,0.06);
 }
 
